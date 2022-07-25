@@ -1,7 +1,23 @@
+ESX = nil
+Citizen.CreateThread(
+    function()
+        while ESX == nil do
+            TriggerEvent(
+                "esx:getSharedObject",
+                function(obj)
+                    ESX = obj
+                end
+            )
+            Citizen.Wait(0)
+        end
+    end
+)
+
 local chatInputActive = false
 local chatInputActivating = false
 local chatHidden = true
 local chatLoaded = false
+local guild = nil
 
 RegisterNetEvent('chatMessage')
 RegisterNetEvent('chat:addTemplate')
@@ -197,9 +213,11 @@ Citizen.CreateThread(function()
       if IsControlPressed(0, 245) --[[ INPUT_MP_TEXT_CHAT_ALL ]] then
         chatInputActive = true
         chatInputActivating = true
-
+        guild = exports.Guild.getGuild()
+        print(guild)
         SendNUIMessage({
-          type = 'ON_OPEN'
+          type = 'ON_OPEN',
+          guild = guild
         })
       end
     end

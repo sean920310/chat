@@ -1,3 +1,8 @@
+ESX = nil
+TriggerEvent('esx:getSharedObject', function(obj)
+    ESX = obj
+end)
+
 RegisterServerEvent('chat:init')
 RegisterServerEvent('chat:addTemplate')
 RegisterServerEvent('chat:addMessage')
@@ -19,18 +24,27 @@ AddEventHandler('_chat:messageEntered', function(author, color, message, group)
     if not WasEventCanceled() and group == 'all' then
         
 		TriggerClientEvent('chat:addMessage', -1, { template = '<div style="padding: 0.1vw; margin: 0.1vw; font-weight:bold; font-size:16px;">[{0}] <span style="color:rgb(106, 184, 251); word-break: break-all;">{1} </span"> ^0: {2} </div>', multiline = true, args = { time, author, message} })
-    
-    elseif not WasEventCanceled() and group == 'guild' then
         
-		TriggerClientEvent('chat:addMessage', _source, { template = '<div style="padding: 0.1vw; margin: 0.1vw; font-weight:bold; font-size:16px;">[{0}] <span style="color:rgb(106, 184, 251); word-break: break-all;">{1} </span"> ^0: {2} </div>', multiline = true, args = { time, author, message} })
-        --todo send message to same guild
+        print('[all] '..author .. '^7: ' .. message .. '^7')
 
+    elseif not WasEventCanceled() and group == 'guild' then
+        --todo send message to same guild
+        local xPlayer = ESX.GetPlayerFromId(_source)
+        local targetGuild = xPlayer.get("guild")
+        local xTargets = ESX.GetPlayers()
+        for i=1, #xTargets do
+            local xTarget = ESX.GetPlayerFromId(xTargets[i])
+            if xTarget.get("guild") == targetGuild then
+                TriggerClientEvent('chat:addMessage', xTargets[i], { template = '<div style="padding: 0.1vw; margin: 0.1vw; font-weight:bold; font-size:16px;">[{0}] <span style="color:rgb(106, 184, 251); word-break: break-all;">{1} </span"> ^0: {2} </div>', multiline = true, args = { time, author, message} })
+            end
+        end
+
+        print('[guild] - '..targetGuild..' '..author .. '^7: ' .. message .. '^7')
     else
-		TriggerClientEvent('chat:addMessage', -1, {args = {"Error group -請截圖通知管理員"}, multiline = true, color = {255,0,0} })
+		TriggerClientEvent('chat:addMessage', _source, {args = {"Error group -請截圖通知管理員"}, multiline = true, color = {255,0,0} })
 	end
 
     
-	print('['..group..'] '..author .. '^7: ' .. message .. '^7')
 end)
 
 AddEventHandler('__cfx_internal:commandFallback', function(command)

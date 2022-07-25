@@ -13,6 +13,7 @@ window.APP = {
       oldMessages: [],
       oldMessagesIndex: -1,
       group: 'all',
+      guild: undefined,
     };
   },
   destroyed() {
@@ -43,7 +44,16 @@ window.APP = {
     },
   },
   methods: {
-    ON_OPEN() {
+    ON_OPEN({ guild }) {
+      this.guild = guild
+      if(!guild)
+      {
+        this.group = 'all'
+        
+        let buf = document.getElementsByClassName('prefix')[0];
+        buf.textContent = '[公頻] ➤';
+      }
+
       this.showInput = true;
       this.showWindow = true;
       if (this.showWindowTimer) {
@@ -55,6 +65,8 @@ window.APP = {
         } else {
           clearInterval(this.focusTimer);
         }
+        this.prefixResize();
+        this.resize()
       }, 100);
     },
     ON_MESSAGE({ message }) {
@@ -115,27 +127,29 @@ window.APP = {
         var buf = document.getElementsByClassName('chat-messages')[0];
         buf.scrollTop = buf.scrollTop + 100;
       } else if (e.which == 9) {   //tab
-        if (this.group == 'all')
-          this.group = 'guild';
-        else
-          this.group = 'all';
-        let grouptxt = '';
-        switch (this.group) {
-          case 'all':
-            grouptxt = '[公頻]';
-            break;
-          case 'guild':
-            grouptxt = '[公會] - 阿呆幫';
-            break;
-          default:
-            grouptxt = 'error';
-            break;
+        if (this.guild || this.group != 'all') {
+          let grouptxt = '';
+          if (this.group == 'all')
+            this.group = 'guild';
+          else
+            this.group = 'all';
+          switch (this.group) {
+            case 'all':
+              grouptxt = '[公頻]';
+              break;
+            case 'guild':
+              grouptxt = '[公會] - ' + this.guild;
+              break;
+            default:
+              grouptxt = 'error';
+              break;
+          }
+
+          let buf = document.getElementsByClassName('prefix')[0];
+          buf.textContent = grouptxt + ' ➤';
+  
+          this.prefixResize()
         }
-        let buf = document.getElementsByClassName('prefix')[0];
-        buf.textContent = grouptxt +' ➤';
-        
-        let width = document.getElementsByClassName('prefix')[0].offsetWidth;
-        document.getElementById('input').style.cssText = 'padding-left:'+ String(width+10) +'px;';
       }
     },
     moveOldMessageIndex(up) {
@@ -149,6 +163,10 @@ window.APP = {
         this.oldMessagesIndex = -1;
         this.message = '';
       }
+    },
+    prefixResize(){
+      let width = document.getElementsByClassName('prefix')[0].offsetWidth;
+      document.getElementById('input').style.cssText = 'padding-left:' + String(width + 10) + 'px;';
     },
     resize() {
       const input = this.$refs.input;
