@@ -214,7 +214,6 @@ Citizen.CreateThread(function()
         chatInputActive = true
         chatInputActivating = true
         guild = exports.Guild.getGuild()
-        print(guild)
         SendNUIMessage({
           type = 'ON_OPEN',
           guild = guild
